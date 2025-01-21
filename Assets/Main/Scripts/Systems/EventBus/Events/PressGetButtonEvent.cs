@@ -1,0 +1,6 @@
+
+public struct PressGetButtonEvent : IEvent
+{
+
+
+}
