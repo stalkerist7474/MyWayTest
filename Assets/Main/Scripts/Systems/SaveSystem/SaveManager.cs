@@ -26,6 +26,7 @@ public class SaveManager : IGameSystem
         MyData = saveSystem.Load();
     }
 
+
     //сохранение в файл данных из SaveData
     public void Save()
     {
@@ -37,6 +38,7 @@ public class SaveManager : IGameSystem
     {
         MyData = saveSystem.Load();
         Save();
+        //IsActivateComplete = true;
     }
 
     //сброс SaveData 
@@ -49,5 +51,6 @@ public class SaveManager : IGameSystem
     public override void Activate()
     {
         this.gameObject.SetActive(true);
+        IsActivateComplete = true;
     }
 }

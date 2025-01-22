@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-
-//����� ����� � ����� � ������� ������������� ����������� ��������� ������� ��������/����������
 public class BootEntryPoint : MonoBehaviour
 {
     [SerializeField] private UICanvas UIStartGame;
@@ -18,14 +16,20 @@ public class BootEntryPoint : MonoBehaviour
         UIStartGame.SwitchOnCanvas();
 
 
-        foreach (var system in gameSystems) // ����������� ��������/��������� ������ ���� ������� ����� �������� �� ���������� ����� �������� ��������(savemanager,firebase, �������, InApp, � ������ SDK � ������� 
+        foreach (var system in gameSystems) 
         {
             system.Activate();
+
+            while (!system.IsActivateComplete)
+            {
+                yield return new WaitForSeconds(0.1f); 
+            }
+            
             Debug.Log($"<color=#20C30C>Load System = {system.gameObject.name}</color>");
         }
 
 
-        yield return new WaitForSeconds(2f); //�������� �������� �� 2 ������� �� ��
+        yield return new WaitForSeconds(2f); 
 
         yield return SceneManager.LoadSceneAsync(Scenes.MENU);
 

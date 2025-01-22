@@ -6,8 +6,8 @@ using UnityEngine;
 [Serializable]
 public class SaveData
 {
-    //[Header("Main parametrs")]
-    //[ReadOnly] public int Coins = 0;
+    [Header("Main parametrs")]
+    [ReadOnly] public int Coins = 0;
 
     
 }
