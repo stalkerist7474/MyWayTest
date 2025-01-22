@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ParseSystem : IGameSystem
 {
-    public static IGameSystem Instance;
+    public static ParseSystem Instance;
     [SerializeField] List<JsonParser> listParser;
 
     private void Awake()
