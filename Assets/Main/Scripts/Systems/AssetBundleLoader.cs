@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class AssetBundleLoader : IGameSystem
+public class AssetBundleLoader : IGameSystem, IEventSubscriber<StartUpdateAssetBundleJsonEvent>
 {
     public static AssetBundleLoader Instance;
     [SerializeField] private string bundleUrl;
@@ -15,6 +15,24 @@ public class AssetBundleLoader : IGameSystem
     [Space]
     [SerializeField] private string namefileSprite = "siamese-cat-lying-down-md.png";
     private string resourcePath = "Assets/Resources";
+
+
+    public void Subscribe()
+    {
+        EventBus.RegisterTo(this as IEventSubscriber<StartUpdateAssetBundleJsonEvent>);
+    }
+    public void Unsubscribe()
+    {
+        EventBus.UnregisterFrom(this as IEventSubscriber<StartUpdateAssetBundleJsonEvent>);
+    }
+    public void OnEvent(StartUpdateAssetBundleJsonEvent eventName)
+    {
+        if (eventName.NeedLoadAssetBundle)
+        {
+            Debug.Log("StartUpdateAssetBundleJsonEvent in AssetBundleLoader");
+            UpdateCurrentAssetBundleSprite();
+        }
+    }
 
     private void Awake()
     {
@@ -28,6 +46,10 @@ public class AssetBundleLoader : IGameSystem
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
+    }
+    private void Start()
+    {
+        Subscribe();
     }
 
     public override void Activate()
@@ -64,26 +86,34 @@ public class AssetBundleLoader : IGameSystem
 
             Sprite sprite = requestAsset.asset as Sprite;
             spriteRenderer.sprite = sprite;
-            SaveSpriteToResources(sprite);
+            EventBus.RaiseEvent(new LoadNewVersionAssetBundleEvent(sprite, namefileSprite));
+
+            bundle.Unload(true);
 
         }
 
         IsActivateComplete = true;
     }
 
-    void SaveSpriteToResources(Sprite sprite)
+
+    private Sprite GetCurrentAssetBundleSprite()
     {
-        string fullAssetPath = Path.Combine(resourcePath, namefileSprite + ".asset");
-        if (!Directory.Exists(Path.GetDirectoryName(fullAssetPath)))
+        if (spriteRenderer.sprite != null)
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(fullAssetPath));
+            return spriteRenderer.sprite;
         }
-        AssetDatabase.CreateAsset(sprite, fullAssetPath);
-        AssetDatabase.SaveAssets();
-        Debug.Log("New Sprite created at: " + fullAssetPath);
-        
+        return null;
     }
 
+    private void UpdateCurrentAssetBundleSprite()
+    {
+        IsActivateComplete = false;
+        StartCoroutine(LoadAssetBundle());
 
-    
+    }
+    private void OnDestroy()
+    {
+        Unsubscribe();
+    }
+
 }

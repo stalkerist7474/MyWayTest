@@ -16,7 +16,7 @@ public class StartNumberParser : JsonParser
         Debug.Log($"Parsed JSON: {myData.startingNumber}");
 
         IsComplete = true;
-
+        EventBus.RaiseEvent(new LoadedNewJsonDataEvent<StartNumber>(myData));
     }
 }
 [System.Serializable]

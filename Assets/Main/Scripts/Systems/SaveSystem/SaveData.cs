@@ -7,7 +7,8 @@ using UnityEngine;
 public class SaveData
 {
     [Header("Main parametrs")]
-    [ReadOnly] public int Coins = 0;
+    [ReadOnly] public int startingNumber = 0;
+    [ReadOnly] public string helloMessage = "";
 
     
 }

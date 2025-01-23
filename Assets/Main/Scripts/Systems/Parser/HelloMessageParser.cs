@@ -16,7 +16,7 @@ public class HelloMessageParser : JsonParser
         Debug.Log($"Parsed JSON: {myData.startingMessage}");
 
         IsComplete = true;
-
+        EventBus.RaiseEvent(new LoadedNewJsonDataEvent<HelloMessage>(myData));
     }
 }
 [System.Serializable]
