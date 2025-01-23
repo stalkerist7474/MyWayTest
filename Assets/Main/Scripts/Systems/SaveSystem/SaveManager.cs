@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class SaveManager : IGameSystem
@@ -47,9 +48,10 @@ public class SaveManager : IGameSystem
         Load();
     }
 
-    public override void Activate()
+    public override async Task Activate()
     {
         this.gameObject.SetActive(true);
         IsActivateComplete = true;
+        await Task.Yield();     
     }
 }

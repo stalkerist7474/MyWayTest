@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class ParseSystem : IGameSystem, IEventSubscriber<StartUpdateAssetBundleJsonEvent>
@@ -20,7 +21,7 @@ public class ParseSystem : IGameSystem, IEventSubscriber<StartUpdateAssetBundleJ
         if (eventName.NeedLoadJson)
         {
             Debug.Log("StartUpdateAssetBundleJsonEvent in ParseSystem");
-            StartCoroutine(LoadJson());
+            Activate();
         }
     }
 
@@ -43,25 +44,18 @@ public class ParseSystem : IGameSystem, IEventSubscriber<StartUpdateAssetBundleJ
         Subscribe();
     }
 
-    public override void Activate()
+    public override async Task Activate()
     {
-        StartCoroutine(LoadJson());
-        
-    }
-
-    private IEnumerator LoadJson()
-    {
+        List<Task> ParseTasks = new List<Task>();
 
         foreach (var item in listParser)
-        {
-            item.LoadJsonFromUrl();
-            while (!item.IsComplete)
-            {
-                yield return new WaitForSeconds(0.1f);
-            }
+        {           
+            ParseTasks.Add(item.LoadJsonFromUrl());
         }
-        IsActivateComplete = true;
+        await Task.WhenAll(ParseTasks);
+
     }
+
 
     private void OnDestroy()
     {

@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -9,29 +11,37 @@ public class BootEntryPoint : MonoBehaviour
     [SerializeField] private List<IGameSystem> gameSystems;
 
 
-    private IEnumerator Start()
+
+
+    private void Start()
+    {
+        StartActivate();
+    }
+
+
+
+    private async Task StartActivate()
     {
         Application.targetFrameRate = 60;
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
         UIStartGame.SwitchOnCanvas();
 
+        List<Task> activationTasks = new List<Task>();
 
-        foreach (var system in gameSystems) 
+        foreach (var system in gameSystems)
         {
-            system.Activate();
-
-            while (!system.IsActivateComplete)
-            {
-                yield return new WaitForSeconds(0.1f); 
-            }
-            
-            Debug.Log($"<color=#20C30C>Load System = {system.gameObject.name}</color>");
+            activationTasks.Add(system.Activate());
+            Debug.Log($"<color=#20C30C>start activation system{system.gameObject.name} </color>");
         }
 
+        await Task.WhenAll(activationTasks);
 
-        yield return new WaitForSeconds(2f); 
+        Debug.Log("<color=#20C30C>All systems on start activated!</color>");
 
-        yield return SceneManager.LoadSceneAsync(Scenes.MENU);
+        await Task.Delay(TimeSpan.FromSeconds(2));
+
+
+        SceneManager.LoadSceneAsync(Scenes.MENU);
 
 
     }

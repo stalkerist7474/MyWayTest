@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections;
 using System.IO;
+using System.Threading.Tasks;
 
 public class JsonParser : MonoBehaviour
 {
@@ -10,15 +11,21 @@ public class JsonParser : MonoBehaviour
 
     public bool IsComplete = false;
 
-    public void LoadJsonFromUrl()
+    public async Task LoadJsonFromUrl()
     {
         if (string.IsNullOrEmpty(jsonUrl))
         {
             Debug.LogError("JSON URL NULL!");
             return;
         }
+            StartCoroutine(LoadJsonCoroutine());
 
-        StartCoroutine(LoadJsonCoroutine());
+        while (!IsComplete)
+        {
+            await Task.Yield();
+        }
+
+
     }
 
     protected IEnumerator LoadJsonCoroutine()

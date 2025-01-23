@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -10,7 +11,6 @@ public class AssetBundleLoader : IGameSystem, IEventSubscriber<StartUpdateAssetB
 {
     public static AssetBundleLoader Instance;
     [SerializeField] private string bundleUrl;
-    [SerializeField] private int version = 0;
     [SerializeField] private SpriteRenderer spriteRenderer;
     [Space]
     [Space]
@@ -54,9 +54,13 @@ public class AssetBundleLoader : IGameSystem, IEventSubscriber<StartUpdateAssetB
         Subscribe();
     }
 
-    public override void Activate()
-    {
+    public override async Task Activate()
+    {     
         StartCoroutine(LoadAssetBundle());
+        while (!IsActivateComplete)
+        {
+            await Task.Yield();
+        }
 
     }
 

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -44,9 +45,17 @@ public class GameManager : IGameSystem,IEventSubscriber<NewGameStateEvent>
 
         IsActivateComplete = true;
     }
-    public override void Activate()
+    public override async Task Activate()
     {
-        this.gameObject.SetActive(true);
+        Debug.Log("Activate GameManager Start");
+        Task task = Task.Run(() =>
+        {
+
+         this.gameObject.SetActive(true);
+
+        });
+
+        await task;
     }
 
 
