@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
@@ -20,7 +19,16 @@ public class ButtonNumberAdd : MonoBehaviour,
     {
         Subscribe();
         button = GetComponent<Button>();
+        InitStartSprite();
         LoadSaveData();
+    }
+
+    private void InitStartSprite()
+    {
+        if (AssetBundleLoader.Instance.SpriteRenderer.sprite != null)
+        {
+            button.image.sprite = AssetBundleLoader.Instance.SpriteRenderer.sprite;
+        }
     }
 
     public void Subscribe()
@@ -37,7 +45,7 @@ public class ButtonNumberAdd : MonoBehaviour,
     {
         if (eventName.TagAsset == tagAssetSprite)
         {
-            Debug.Log("LoadNewVersionAssetBundleEvent in ButtonNumberAdd");
+            //Debug.Log("LoadNewVersionAssetBundleEvent in ButtonNumberAdd");
             button.image.sprite = eventName.NewSprite;
         }
     }

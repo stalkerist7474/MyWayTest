@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 
+
 public class AssetBundleLoader : IGameSystem, IEventSubscriber<StartUpdateAssetBundleJsonEvent>
 {
     public static AssetBundleLoader Instance;
@@ -16,6 +17,7 @@ public class AssetBundleLoader : IGameSystem, IEventSubscriber<StartUpdateAssetB
     [SerializeField] private string namefileSprite = "siamese-cat-lying-down-md.png";
     private string resourcePath = "Assets/Resources";
 
+    public SpriteRenderer SpriteRenderer { get => spriteRenderer; set => spriteRenderer = value; }
 
     public void Subscribe()
     {
@@ -60,49 +62,55 @@ public class AssetBundleLoader : IGameSystem, IEventSubscriber<StartUpdateAssetB
 
     private IEnumerator LoadAssetBundle()
     {
-        while (!Caching.ready)
-            yield return null;
-
-        using (UnityWebRequest req = UnityWebRequestAssetBundle.GetAssetBundle(bundleUrl))
-        {
-            yield return req.SendWebRequest();
-
-            if (req.result != UnityWebRequest.Result.Success)
-            {
-                Debug.LogError("Failed to download AssetBundle: " + req.error);
-                yield break;
-            }
-
-            AssetBundle bundle = DownloadHandlerAssetBundle.GetContent(req);
-            if (bundle == null)
-            {
-                Debug.LogError("Failed to load AssetBundle from the download: ");
-                yield break;
-            }
-
-            var requestAsset = bundle.LoadAssetAsync(namefileSprite, typeof(Sprite));
-            yield return requestAsset;
 
 
-            Sprite sprite = requestAsset.asset as Sprite;
-            spriteRenderer.sprite = sprite;
-            EventBus.RaiseEvent(new LoadNewVersionAssetBundleEvent(sprite, namefileSprite));
+        UnityWebRequest get = UnityWebRequestAssetBundle.GetAssetBundle(bundleUrl);
+        yield return get.SendWebRequest();
 
-            bundle.Unload(true);
+        UnityWebRequest www = UnityWebRequest.Get(bundleUrl);
+        yield return www.SendWebRequest();
 
-        }
+        AssetBundle bundle = DownloadHandlerAssetBundle.GetContent(get);
+
+        System.IO.File.WriteAllBytes(resourcePath + "/" + bundle.name, www.downloadHandler.data);
+
+        bundle.Unload(true);
+
+        yield return www.isDone;
 
         IsActivateComplete = true;
+
+        StartCoroutine(LoadSprite("backgrondspritebutton"));
+
     }
 
+    //backgrondspritebutton
 
-    private Sprite GetCurrentAssetBundleSprite()
+    private IEnumerator LoadSprite(string nameAsset)
     {
-        if (spriteRenderer.sprite != null)
+        AssetBundle assetBundle = AssetBundle.LoadFromFile(resourcePath + "/" + "button" + "/" + nameAsset);
+
+        if (assetBundle == null)
         {
-            return spriteRenderer.sprite;
+            Debug.LogError("Failed to load AssetBundle!");
+            yield break;
         }
-        return null;
+
+        AssetBundleRequest request = assetBundle.LoadAssetAsync<Sprite>(namefileSprite);
+        yield return request;
+
+        Sprite loadedSprite = request.asset as Sprite;
+
+        if (loadedSprite == null)
+        {
+            Debug.LogError("Failed to load Sprite from AssetBundle!");
+            yield break;
+        }
+
+        SpriteRenderer.sprite = loadedSprite;
+
+        EventBus.RaiseEvent(new LoadNewVersionAssetBundleEvent(SpriteRenderer.sprite, namefileSprite));
+        assetBundle.Unload(false);
     }
 
     private void UpdateCurrentAssetBundleSprite()

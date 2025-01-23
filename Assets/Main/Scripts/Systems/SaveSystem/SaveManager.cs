@@ -38,7 +38,6 @@ public class SaveManager : IGameSystem
     {
         MyData = saveSystem.Load();
         Save();
-        //IsActivateComplete = true;
     }
 
     //сброс SaveData 
